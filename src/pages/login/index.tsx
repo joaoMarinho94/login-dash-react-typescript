@@ -1,13 +1,16 @@
 import React, { useRef } from 'react';
 import { SubmitHandler, FormHandles } from '@unform/core';
+import { useHistory } from 'react-router-dom';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { Dispatch } from 'redux';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
 
 import { Button, FormGroup, FormCheck } from 'react-bootstrap';
 
 import './styles.css';
+import * as AuthActions from '../../redux/auth/actions';
 import Input from '../../components/input';
 import api from '../../services/api';
 
@@ -18,12 +21,14 @@ interface FormData {
 }
 
 const initialData = {
-  account: null,
-  username: '',
-  password: '',
+  account: 101694,
+  username: 'ederfel',
+  password: 'abc1234',
+  force: 1,
 };
 
 const Login: React.FC = () => {
+  const history = useHistory();
   const dispatch: Dispatch<any> = useDispatch();
   const formRef = useRef<FormHandles>(null);
 
@@ -54,13 +59,31 @@ const Login: React.FC = () => {
   // };
 
   const handleSubmit: SubmitHandler<FormData> = async values => {
-    // dispatch(removeArticle(article))
-    // try {
-    //   const { data } = await api.post('/users/token', values);
-    //   console.log('data: ', data);
-    // } catch (err) {
-    //   console.log('err: ', err);
-    // }
+    try {
+      const { data } = await api.post('/users/token', values);
+
+      if (data.data.fail === 'session') {
+        toast.error(
+          'Encontramos uma sessão em andamento. Habilite entrar a força para atualizar a sessão.',
+        );
+        return;
+      }
+
+      dispatch(
+        AuthActions.updateUser({
+          token: data.data.token,
+          account: values.account,
+          username: values.username,
+        }),
+      );
+      history.push('/dashboard');
+    } catch (err) {
+      if (err.response.status === 401) {
+        toast.error('Usuário ou senha incorretos.');
+        return;
+      }
+      toast.error('Ocorreu um erro ao efetuar o login. Tente novamente.');
+    }
   };
 
   return (
@@ -72,14 +95,22 @@ const Login: React.FC = () => {
           <br />
           Acessar o Dashboard
         </h2>
-        <Input name="account" type="number" label="Conta:" />
-        <Input name="username" label="Usuário:" />
-        <Input name="password" type="password" label="Senha:" />
+        <Input name="account" type="number" required label="Conta:" />
+        <Input name="username" required label="Usuário:" />
+        <Input name="password" type="password" required label="Senha:" />
         <FormGroup>
           <FormCheck
             type="checkbox"
             id="Keep-me-connected"
             label="Mantenha-me conectado"
+            custom
+          />
+        </FormGroup>
+        <FormGroup>
+          <FormCheck
+            type="checkbox"
+            id="force"
+            label='Entrar a "força"'
             custom
           />
         </FormGroup>

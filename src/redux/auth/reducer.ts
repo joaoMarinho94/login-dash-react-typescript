@@ -2,7 +2,7 @@ import { IAuthState, AuthActions } from './types';
 import { Constants } from './constants';
 
 const init: IAuthState = {
-  list: [],
+  user: {},
 };
 
 export function authReducer(
@@ -10,8 +10,8 @@ export function authReducer(
   action: AuthActions,
 ): IAuthState {
   switch (action.type) {
-    case Constants.ADD_ITEM:
-      return { list: [...state.list, action.payload.item] };
+    case Constants.UPDATE_USER:
+      return { ...state, user: action.payload };
     default:
       return state;
   }
