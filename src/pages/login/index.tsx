@@ -2,6 +2,8 @@ import React, { useRef } from 'react';
 import { SubmitHandler, FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
+import { Dispatch } from 'redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { Button, FormGroup, FormCheck } from 'react-bootstrap';
 
@@ -22,6 +24,7 @@ const initialData = {
 };
 
 const Login: React.FC = () => {
+  const dispatch: Dispatch<any> = useDispatch();
   const formRef = useRef<FormHandles>(null);
 
   // const handleSubmit: SubmitHandler<FormData> = async data => {
@@ -51,12 +54,13 @@ const Login: React.FC = () => {
   // };
 
   const handleSubmit: SubmitHandler<FormData> = async values => {
-    try {
-      const { data } = await api.post('/users/token', values);
-      console.log('data: ', data);
-    } catch (err) {
-      console.log('err: ', err);
-    }
+    // dispatch(removeArticle(article))
+    // try {
+    //   const { data } = await api.post('/users/token', values);
+    //   console.log('data: ', data);
+    // } catch (err) {
+    //   console.log('err: ', err);
+    // }
   };
 
   return (
