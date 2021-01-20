@@ -96,11 +96,18 @@ const Login: React.FC = () => {
       dispatch(AuthActions.updateUser(user));
       sessionStorage.setItem('user', JSON.stringify(user));
 
-      if (KeepMeConnected) localStorage.setItem('user', JSON.stringify(user));
+      const { data: data2 } = await api.get('/users/me');
+
+      const userAditionalData = { ...user, id: data2.id, active: data2.active };
+
+      sessionStorage.setItem('user', JSON.stringify(userAditionalData));
+
+      if (KeepMeConnected)
+        localStorage.setItem('user', JSON.stringify(userAditionalData));
 
       history.push('/dashboard');
     } catch (err) {
-      if (err.response.status === 401) {
+      if (err.response?.status === 401) {
         toast.error('Usuário ou senha incorretos.');
         return;
       }

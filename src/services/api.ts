@@ -15,7 +15,7 @@ api.interceptors.request.use(config => {
   if (userSessionStorage) user = JSON.parse(userSessionStorage);
   else if (userLocalStorage) user = JSON.parse(userLocalStorage);
 
-  if (user.token) {
+  if (user?.token) {
     config.headers.Authorization = `Bearer ${user.token}`;
   }
   return config;
