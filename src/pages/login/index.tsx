@@ -7,7 +7,7 @@ import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-import { Button, FormGroup, FormCheck } from 'react-bootstrap';
+import { Button, FormGroup, FormCheck, Spinner } from 'react-bootstrap';
 
 import './styles.css';
 import * as AuthActions from '../../redux/auth/actions';
@@ -32,6 +32,7 @@ const Login: React.FC = () => {
   const dispatch: Dispatch<any> = useDispatch();
   const formRef = useRef<FormHandles>(null);
 
+  const [loading, setLoading] = useState(false);
   const [force, setForce] = useState(0);
   const [KeepMeConnected, setKeepMeConnected] = useState(false);
 
@@ -76,6 +77,10 @@ const Login: React.FC = () => {
 
   const handleSubmit: SubmitHandler<FormData> = async values => {
     try {
+      if (loading) return;
+
+      setLoading(true);
+
       const bodyData = { ...values, force };
 
       const { data } = await api.post('/users/token', bodyData);
@@ -98,7 +103,12 @@ const Login: React.FC = () => {
 
       const { data: data2 } = await api.get('/users/me');
 
-      const userAditionalData = { ...user, id: data2.id, active: data2.active };
+      const userAditionalData = {
+        ...user,
+        id: data2[0].id,
+        active: data2[0].active,
+      };
+      console.log('userAditionalData: ', userAditionalData);
 
       sessionStorage.setItem('user', JSON.stringify(userAditionalData));
 
@@ -112,6 +122,8 @@ const Login: React.FC = () => {
         return;
       }
       toast.error('Ocorreu um erro ao efetuar o login. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -147,7 +159,7 @@ const Login: React.FC = () => {
         </FormGroup>
         <div className="center">
           <Button variant="primary" type="submit">
-            Entrar
+            {loading ? <Spinner animation="border" /> : 'Entrar'}
           </Button>
         </div>
       </Form>
