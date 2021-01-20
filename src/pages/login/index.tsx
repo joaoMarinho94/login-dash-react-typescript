@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { SubmitHandler, FormHandles } from '@unform/core';
 import { useHistory } from 'react-router-dom';
 import { Form } from '@unform/web';
@@ -32,6 +32,22 @@ const Login: React.FC = () => {
   const dispatch: Dispatch<any> = useDispatch();
   const formRef = useRef<FormHandles>(null);
 
+  const [force, setForce] = useState(0);
+  const [KeepMeConnected, setKeepMeConnected] = useState(false);
+
+  useEffect(() => {
+    const userSessionStorage = sessionStorage.getItem('user');
+    const userLocalStorage = localStorage.getItem('user');
+    let user = null;
+
+    if (userSessionStorage) user = JSON.parse(userSessionStorage);
+    else if (userLocalStorage) user = JSON.parse(userLocalStorage);
+    else return;
+
+    dispatch(AuthActions.updateUser(user));
+    history.push('/dashboard');
+  }, [dispatch, history]);
+
   // const handleSubmit: SubmitHandler<FormData> = async data => {
   //   try {
   //     formRef.current?.setErrors({});
@@ -60,7 +76,9 @@ const Login: React.FC = () => {
 
   const handleSubmit: SubmitHandler<FormData> = async values => {
     try {
-      const { data } = await api.post('/users/token', values);
+      const bodyData = { ...values, force };
+
+      const { data } = await api.post('/users/token', bodyData);
 
       if (data.data.fail === 'session') {
         toast.error(
@@ -69,13 +87,17 @@ const Login: React.FC = () => {
         return;
       }
 
-      dispatch(
-        AuthActions.updateUser({
-          token: data.data.token,
-          account: values.account,
-          username: values.username,
-        }),
-      );
+      const user = {
+        token: data.data.token,
+        account: values.account,
+        username: values.username,
+      };
+
+      dispatch(AuthActions.updateUser(user));
+      sessionStorage.setItem('user', JSON.stringify(user));
+
+      if (KeepMeConnected) localStorage.setItem('user', JSON.stringify(user));
+
       history.push('/dashboard');
     } catch (err) {
       if (err.response.status === 401) {
@@ -104,6 +126,7 @@ const Login: React.FC = () => {
             id="Keep-me-connected"
             label="Mantenha-me conectado"
             custom
+            onChange={() => setKeepMeConnected(!KeepMeConnected)}
           />
         </FormGroup>
         <FormGroup>
@@ -112,6 +135,7 @@ const Login: React.FC = () => {
             id="force"
             label='Entrar a "força"'
             custom
+            onChange={() => setForce(1)}
           />
         </FormGroup>
         <div className="center">
