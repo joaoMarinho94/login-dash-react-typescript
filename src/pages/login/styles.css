@@ -1,4 +1,4 @@
-.container{
+.container {
   min-width: 100% !important;
   height: 100vh;
   display: flex;
@@ -7,29 +7,29 @@
   flex-direction: column;
 }
 
-img{
+img {
   margin-bottom: 60px;
   width: 400px;
 }
 
-form{
+form {
   width: 450px;
   background: #f39520de;
   padding: 35px;
   border-radius: 5px;
 }
 
-form h2{
+form h2 {
   color: white;
   margin-bottom: 15px;
 }
 
-form label{
+form label {
   color: white;
   margin-bottom: 0px;
 }
 
-form button{
+form button {
   width: 100%;
   border-radius: 5px;
   background: #127aba;
