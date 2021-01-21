@@ -15,21 +15,30 @@ import Input from '../../components/input';
 import api from '../../services/api';
 
 interface FormData {
-  account: string;
+  account: number;
   username: string;
   password: string;
 }
 
+interface ISomeObject {
+  [key: string]: string;
+}
+
+// const initialData = {
+//   account: 101694,
+//   username: 'ederfel',
+//   password: 'abc1234',
+// };
+
 const initialData = {
-  account: 101694,
-  username: 'ederfel',
-  password: 'abc1234',
-  force: 1,
+  account: null,
+  username: '',
+  password: '',
 };
 
 const Login: React.FC = () => {
   const history = useHistory();
-  const dispatch: Dispatch<any> = useDispatch();
+  const dispatch: Dispatch = useDispatch();
   const formRef = useRef<FormHandles>(null);
 
   const [loading, setLoading] = useState(false);
@@ -49,37 +58,41 @@ const Login: React.FC = () => {
     history.push('/dashboard');
   }, [dispatch, history]);
 
-  // const handleSubmit: SubmitHandler<FormData> = async data => {
-  //   try {
-  //     formRef.current?.setErrors({});
-  //     const schema = Yup.object().shape({
-  //       account: Yup.string().required('A conta é obrigatória'),
-  //       username: Yup.string().required('O usuário é obrigatório'),
-  //       password: Yup.string().required('A senha é obrigatória'),
-  //     });
+  const handleValidation = async (data: FormData) => {
+    try {
+      formRef.current?.setErrors({});
+      const schema = Yup.object().shape({
+        account: Yup.string().required('A conta é obrigatória'),
+        username: Yup.string().required('O usuário é obrigatório'),
+        password: Yup.string().required('A senha é obrigatória'),
+      });
 
-  //     await schema.validate(data, {
-  //       abortEarly: false,
-  //     });
+      await schema.validate(data, {
+        abortEarly: false,
+      });
 
-  //     console.log(data);
-  //     formRef.current?.setErrors({});
-  //   } catch (err) {
-  //     const validationErrors = {};
-  //     if (err instanceof Yup.ValidationError) {
-  //       err.inner.forEach(error => {
-  //         validationErrors[error.path] = error.message;
-  //       });
-  //       // formRef.current?.setErrors(validationErrors);
-  //     }
-  //   }
-  // };
+      return true;
+    } catch (err) {
+      const validationErrors: ISomeObject = {};
+      if (err instanceof Yup.ValidationError) {
+        err.inner.forEach(error => {
+          validationErrors[error.path || ''] = error.message;
+        });
+        formRef.current?.setErrors(validationErrors);
+      }
+      return false;
+    }
+  };
 
   const handleSubmit: SubmitHandler<FormData> = async values => {
     try {
       if (loading) return;
 
       setLoading(true);
+
+      const validation = await handleValidation(values);
+
+      if (!validation) return;
 
       const bodyData = { ...values, force };
 
@@ -104,10 +117,9 @@ const Login: React.FC = () => {
 
       const userAditionalData = {
         ...user,
-        id: data2[0].id,
-        active: data2[0].active,
+        id: data2.data[0].id,
+        active: data2.data[0].active,
       };
-      console.log('userAditionalData: ', userAditionalData);
 
       dispatch(AuthActions.updateUser(userAditionalData));
 
@@ -137,9 +149,9 @@ const Login: React.FC = () => {
           <br />
           Acessar o Dashboard
         </h2>
-        <Input name="account" type="number" required label="Conta:" />
-        <Input name="username" required label="Usuário:" />
-        <Input name="password" type="password" required label="Senha:" />
+        <Input name="account" type="number" label="Conta:" />
+        <Input name="username" label="Usuário:" />
+        <Input name="password" type="password" label="Senha:" />
         <FormGroup>
           <FormCheck
             type="checkbox"
