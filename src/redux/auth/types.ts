@@ -5,4 +5,6 @@ export type AuthActions = ActionType<typeof actions>;
 
 export interface IAuthState {
   user: {};
+  widgets: [{}];
+  widgetsUser: [{}];
 }
