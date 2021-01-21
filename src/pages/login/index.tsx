@@ -98,10 +98,9 @@ const Login: React.FC = () => {
         username: values.username,
       };
 
-      dispatch(AuthActions.updateUser(user));
-      sessionStorage.setItem('user', JSON.stringify(user));
-
-      const { data: data2 } = await api.get('/users/me');
+      const { data: data2 } = await api.get('/users/me', {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
 
       const userAditionalData = {
         ...user,
@@ -109,6 +108,8 @@ const Login: React.FC = () => {
         active: data2[0].active,
       };
       console.log('userAditionalData: ', userAditionalData);
+
+      dispatch(AuthActions.updateUser(userAditionalData));
 
       sessionStorage.setItem('user', JSON.stringify(userAditionalData));
 

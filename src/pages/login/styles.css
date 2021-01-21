@@ -7,7 +7,7 @@
   flex-direction: column;
 }
 
-img {
+.container img {
   margin-bottom: 60px;
   width: 400px;
 }
